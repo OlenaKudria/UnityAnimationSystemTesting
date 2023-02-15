@@ -5,10 +5,10 @@ namespace Core.Scripts
     public class AnimationScriptController : MonoBehaviour
     {
         private Animator _animator;
-        private static readonly int IsWalking = Animator.StringToHash("isWalking");
-        private static readonly int IsRunning = Animator.StringToHash("isRunning");
-       
-
+        private float _velocity = 0.0f;
+        public float acceleration = 0.1f;
+        public float deceleration = 0.5f;
+        private static readonly int VelocityHash = Animator.StringToHash("Velocity") ;
         void Start()
         {
             _animator = GetComponent<Animator>();
@@ -18,21 +18,17 @@ namespace Core.Scripts
         {
             bool forwardPressed = Input.GetKey("w");
             bool runPressed = Input.GetKey("left shift");
-            bool isWalking = _animator.GetBool(IsWalking);
-            bool isRunning = _animator.GetBool(IsRunning);
+
+            if (forwardPressed && _velocity < 1)
+                _velocity += Time.deltaTime * acceleration;
             
-            if (!isWalking && forwardPressed)
-                _animator.SetBool(IsWalking, true);
+            if (!forwardPressed && _velocity > 0.0f)
+                _velocity -= Time.deltaTime * deceleration;
+
+            if (!forwardPressed && _velocity < 0.0f)
+                _velocity = 0.0f;
             
-            if (isWalking && !forwardPressed)
-                _animator.SetBool(IsWalking, false);
-            
-            if(!isRunning && forwardPressed && runPressed)
-                _animator.SetBool(IsRunning, true);
-            
-            if(isRunning && (!forwardPressed || !runPressed))
-                _animator.SetBool(IsRunning, false);
-                
+            _animator.SetFloat(VelocityHash, _velocity);
         }
     }
 }
