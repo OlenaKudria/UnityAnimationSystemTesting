@@ -16,8 +16,8 @@ namespace Core.Scripts
         
         void Update()
         {
-            bool forwardPressed = Input.GetKey("w");
-            bool runPressed = Input.GetKey("left shift");
+            bool forwardPressed = Input.GetKey(KeyCode.W);
+            bool runPressed = Input.GetKey(KeyCode.LeftShift);
 
             if (forwardPressed && _velocity < 1)
                 _velocity += Time.deltaTime * acceleration;
