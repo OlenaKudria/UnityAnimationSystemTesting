@@ -18,10 +18,14 @@ public class TwoDAnimationStateController : MonoBehaviour
         _animator = GetComponent<Animator>();
     }
 
-    void AccelerationVelocity(bool forwardPressed, bool leftPressed, bool rightPressed, float currentMaxVelocity)
+    void AccelerationVelocity(bool forwardPressed, bool leftPressed, bool rightPressed, float currentMaxVelocity, 
+        bool backwardsPressed)
     {
         if (forwardPressed && _velocityZ < currentMaxVelocity)
             _velocityZ += Time.deltaTime * acceleration;
+        
+        if (backwardsPressed && _velocityZ > -currentMaxVelocity)
+            _velocityZ -= Time.deltaTime * acceleration;
         
         if (leftPressed && _velocityX > -currentMaxVelocity)
             _velocityX -= Time.deltaTime * acceleration;
@@ -30,10 +34,13 @@ public class TwoDAnimationStateController : MonoBehaviour
             _velocityX += Time.deltaTime * acceleration;
     }
 
-    void DecelerationVelocity(bool forwardPressed, bool leftPressed, bool rightPressed)
+    void DecelerationVelocity(bool forwardPressed, bool leftPressed, bool rightPressed, bool backwardsPressed)
     {
         if (!forwardPressed && _velocityZ > 0.0f)
             _velocityZ -= Time.deltaTime * deceleration;
+        
+        if (!backwardsPressed && _velocityZ < 0.0f)
+            _velocityZ += Time.deltaTime * deceleration;
         
         if (!leftPressed && _velocityX < 0.0f)
             _velocityX += Time.deltaTime * deceleration;
@@ -42,17 +49,17 @@ public class TwoDAnimationStateController : MonoBehaviour
             _velocityX -= Time.deltaTime * deceleration;
     }
 
-    void ResetVelocity(bool forwardPressed, bool leftPressed, bool rightPressed)
+    void ResetVelocity(bool forwardPressed, bool leftPressed, bool rightPressed, bool backwardsPressed)
     {
-        if (!forwardPressed && _velocityZ < 0.0f)
+        if (!forwardPressed && !backwardsPressed && _velocityZ != 0.0f && (_velocityZ > -0.05f && _velocityZ < 0.05f))
             _velocityZ = 0.0f;
 
         if(!rightPressed && !leftPressed && _velocityX != 0.0f && (_velocityX > -0.05f && _velocityX < 0.05f))
             _velocityX = 0.0f;
     }
-
-    void LockVelocity(bool forwardPressed, bool leftPressed, bool rightPressed, bool runPressed,
-        float currentMaxVelocity)
+    
+void LockVelocity(bool forwardPressed, bool leftPressed, bool rightPressed, bool runPressed,
+        float currentMaxVelocity, bool backwardsPressed)
     {
         //lock forward
         if (forwardPressed && runPressed && _velocityZ > currentMaxVelocity)
@@ -65,6 +72,18 @@ public class TwoDAnimationStateController : MonoBehaviour
         }
         else if (forwardPressed && _velocityZ < currentMaxVelocity && _velocityZ > (currentMaxVelocity - 0.05f))
             _velocityZ = currentMaxVelocity;
+        
+        //lock backwards
+        if (backwardsPressed && runPressed && _velocityZ < -currentMaxVelocity)
+            _velocityZ = -currentMaxVelocity;
+        else if (backwardsPressed && _velocityZ < -currentMaxVelocity)
+        {
+            _velocityZ += Time.deltaTime * deceleration;
+            if (_velocityZ < -currentMaxVelocity && _velocityZ > (-currentMaxVelocity - 0.05f))
+                _velocityZ = -currentMaxVelocity;
+        }
+        else if (backwardsPressed && _velocityZ > -currentMaxVelocity && _velocityZ < (-currentMaxVelocity + 0.05f))
+            _velocityZ = -currentMaxVelocity;
         
         //lock leftPressed
         if (leftPressed && runPressed && _velocityX < -currentMaxVelocity)
@@ -97,14 +116,15 @@ public class TwoDAnimationStateController : MonoBehaviour
         bool leftPressed = Input.GetKey(KeyCode.A);
         bool rightPressed = Input.GetKey(KeyCode.D);
         bool runPressed = Input.GetKey(KeyCode.LeftShift);
+        bool backwardsPressed = Input.GetKey(KeyCode.S);
 
         float currentMaxVelocity = runPressed ? MaximumRunVelocity : MaximumWalkVelocity;
 
-        AccelerationVelocity(forwardPressed, leftPressed, rightPressed, currentMaxVelocity);
-        DecelerationVelocity(forwardPressed, leftPressed, rightPressed);
+        AccelerationVelocity(forwardPressed, leftPressed, rightPressed, currentMaxVelocity, backwardsPressed);
+        DecelerationVelocity(forwardPressed, leftPressed, rightPressed, backwardsPressed);
 
-        ResetVelocity(forwardPressed, leftPressed, rightPressed);
-        LockVelocity(forwardPressed, leftPressed, rightPressed, runPressed, currentMaxVelocity);
+        ResetVelocity(forwardPressed, leftPressed, rightPressed, backwardsPressed);
+        LockVelocity(forwardPressed, leftPressed, rightPressed, runPressed, currentMaxVelocity, backwardsPressed);
         
         _animator.SetFloat(VelocityZHash, _velocityZ);
         _animator.SetFloat(VelocityXHash, _velocityX);

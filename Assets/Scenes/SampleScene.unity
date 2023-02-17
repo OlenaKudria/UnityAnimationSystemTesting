@@ -273,7 +273,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 2
-  deceleration: 2.5
+  deceleration: 2
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
