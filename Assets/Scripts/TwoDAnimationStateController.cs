@@ -97,7 +97,7 @@ void LockVelocity(bool forwardPressed, bool leftPressed, bool rightPressed, bool
         else if (leftPressed && _velocityX > -currentMaxVelocity && _velocityX < (-currentMaxVelocity + 0.05f))
             _velocityX = -currentMaxVelocity;
         
-        //lock leftPressed
+        //lock rightPressed
         if (rightPressed && runPressed && _velocityX > currentMaxVelocity)
             _velocityX = currentMaxVelocity;
         else if (rightPressed && _velocityX > currentMaxVelocity)
